@@ -10,7 +10,6 @@ Created on Wed May  8 18:59:05 2024
 #Purpose: keep track of portfolio in a simulation or for real
 #We are assuming that the ticker is doesn't change
 import numpy as np
-from options import parse_option_symbol 
 import pandas as pd
 
 class portfolio:
@@ -50,7 +49,7 @@ class portfolio:
                "quantity": pd.Series(dtype = 'int'),
                "premium": pd.Series(dtype = 'float'),
            }
-       )       
+       )
         
     def buy(self, ticker, quantity, price):
         assert (quantity > 0) & (price > 0)
@@ -147,7 +146,9 @@ class portfolio:
     def option_exists(self, option_ticker):
         return self.options['option_ticker'].isin([option_ticker]).any() 
 
-           
+  
+        
+            
     def total_worth(self,current_price):
         
         if self.last_av_price is None:
@@ -192,6 +193,19 @@ class portfolio:
         if ind != self.history.index.min():
             self.history.loc[ind,'Real ROI'] = self.history.loc[ind,'Worth']\
                 /self.history.loc[self.history.index[self.history.index.get_loc(ind)-1],'Worth']        
+
+    def to_num_share(self,x,current_price):
+        #x is the percentage allocation should be 1d
+        
+        #Calculate total worth and convert it to number of shares
+        total_worth = self.total_worth(current_price)
+        num_share = x*total_worth
+        num_share = np.floor(num_share/current_price)
+        
+        #calculate the real portfolio allocation percentage
+        x_discrete = num_share*current_price/total_worth
+        
+        return x_discrete,num_share
     
 
         
